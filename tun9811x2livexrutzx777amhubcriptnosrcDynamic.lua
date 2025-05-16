@@ -680,40 +680,28 @@ spawn(function()
                                 wait()
                                 if getgenv().Config["Enabled Safe Mode"] and game.Players.LocalPlayer.Character.Humanoid.Health <= HealthMs then
                                     TP(checkh.CFrame * CFrame.new(0,50,4))
-                                    local args = {
-                                        {
-                                            Goal = "LeftClickRelease"
-                                        }
-                                    }
-                                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                                 else
                                     TP(checkh.CFrame * CFrame.new(0,0,4))
-                                    local args = {
-                                        {
-                                            Goal = "LeftClickRelease"
-                                        }
-                                    }
-                                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                                 end
-                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0 or not v.Parent
+                                local args = {
+                                    { Goal = "LeftClick" }
+                                }
+                                game.Players.LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0
                         else
                             local args = {
-                                {
-                                    Goal = "LeftClickRelease"
-                                }
+                                { Goal = "LeftClickRelease" }
                             }
-                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            game.Players.LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                         end
                     end
                 end
             end)
         else
             local args = {
-                {
-                    Goal = "LeftClickRelease"
-                }
+                { Goal = "LeftClickRelease" }
             }
-            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+            game.Players.LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
         end
     end
 end)
