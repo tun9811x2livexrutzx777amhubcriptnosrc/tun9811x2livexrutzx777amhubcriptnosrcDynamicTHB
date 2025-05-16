@@ -679,30 +679,30 @@ spawn(function()
                             repeat
                                 wait()
                                 if getgenv().Config["Enabled Safe Mode"] and game.Players.LocalPlayer.Character.Humanoid.Health <= HealthMs then
-                                TP(checkh.CFrame * CFrame.new(0,50,4))
-                                local args = {
-                                    {
-                                        Goal = "LeftClick"
+                                    TP(checkh.CFrame * CFrame.new(0,50,4))
+                                    local args = {
+                                        {
+                                            Goal = "LeftClickRelease"
+                                        }
                                     }
-                                }
-                                game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-                            else
-                                TP(checkh.CFrame * CFrame.new(0,0,4))
-                                local args = {
-                                    {
-                                        Goal = "LeftClick"
+                                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                                else
+                                    TP(checkh.CFrame * CFrame.new(0,0,4))
+                                    local args = {
+                                        {
+                                            Goal = "LeftClickRelease"
+                                        }
                                     }
-                                }
-                                game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-                            end
-                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0
+                                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                                end
+                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0 or not v.Parent
                         else
-                        local args = {
-                            {
-                                Goal = "LeftClickRelease"
+                            local args = {
+                                {
+                                    Goal = "LeftClickRelease"
+                                }
                             }
-                        }
-                        game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                         end
                     end
                 end
