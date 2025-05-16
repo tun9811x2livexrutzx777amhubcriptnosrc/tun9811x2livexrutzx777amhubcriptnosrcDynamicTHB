@@ -65,6 +65,9 @@ game:GetService("Players").LocalPlayer.Idled:connect(function()
 	wait(180)
 	game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 end)
+function TP(Pos)
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Pos
+end
 local TweenService = game:GetService("TweenService")
 _G.Logo = 83452741766028 --- เลข logo
 if game.CoreGui:FindFirstChild("ImageButton") then
@@ -129,8 +132,8 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.RightControl
 })
 local Tabs = {
-    General = Window:AddTab({ Title = "General", Icon = "component" }),
-	Parry = Window:AddTab({ Title = "Parry", Icon = "shield" }),
+    Legit = Window:AddTab({ Title = "Legit", Icon = "" }),
+	Rage = Window:AddTab({ Title = "Rage", Icon = "" }),
 	Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 local Options = Fluent.Options
@@ -138,9 +141,9 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local hrp = Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-Tabs.General:AddSection("Main")
-Tabs.General:AddToggle("Auto Attack", {
+local hrp = Players.LocalPlayer.Character.HumanoidRootPart
+Tabs.Legit:AddSection("Attack")
+Tabs.Legit:AddToggle("Auto Attack", {
     Title = "Auto Attack", 
     Description = "",
     Default = getgenv().Config["Auto Attack"] or false,
@@ -155,61 +158,14 @@ spawn(function()
             pcall(function()
                 for i,v in pairs(workspace.Live:GetChildren()) do
                     local checkh = v:FindFirstChild "HumanoidRootPart"
-                    if checkh and (checkh.Position - hrp.Position).Magnitude <= 25 then
-                        local args = {
-                            {
-                                Goal = "LeftClick"
-                            }
-                        }
-                        game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-                    else
-                    local args = {
-                        {
-                            Goal = "LeftClickRelease"
-                        }
-                    }
-                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-                    end
-                end
-            end)
-        else
-            local args = {
-                {
-                    Goal = "LeftClickRelease"
-                }
-            }
-            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-        end
-    end
-end)
-Tabs.General:AddSection("Kill Players")
-Tabs.General:AddToggle("Auto Kill Players", {
-    Title = "Auto Kill Players", 
-    Description = "",
-    Default = getgenv().Config["Auto Kill Players"] or false,
-    Callback = function(Value)
-        getgenv().Config["Auto Kill Players"] = Value
-        getgenv()['Update_Setting'](getgenv()['MyName'])
-    end
-})
-spawn(function()
-    while task.wait() do
-        if getgenv().Config["Auto Kill Players"] then
-            pcall(function()
-                for i,v in pairs(workspace.Live:GetChildren()) do
-                    local checkh = v:FindFirstChild "HumanoidRootPart"
-                    if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" then
-                        if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Distance"] then
-                            repeat
-                                task.wait()
-                                hrp.CFrame = checkh.CFrame * CFrame.new(0,0,6)
-                                local args = {
-                                    {
-                                        Goal = "LeftClick"
-                                    }
+                    if v.Name ~= Players.LocalPlayer.Name then
+                        if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Radius Attack"] then
+                            local args = {
+                                {
+                                    Goal = "LeftClick"
                                 }
-                                game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
-                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                         else
                         local args = {
                             {
@@ -231,21 +187,65 @@ spawn(function()
         end
     end
 end)
-Tabs.General:AddSlider("Distance",
+Tabs.Legit:AddSlider("Radius",
     {
-        Title = "Distance",
+        Title = "Radius",
         Description = "",
-        Default = getgenv().Config["Distance"] or 150,
-        Min = 50,
-        Max = 300,
+        Default = getgenv().Config["Radius"] or 15,
+        Min = 5,
+        Max = 30,
         Rounding = 0,
         Callback = function(Value)
-            getgenv().Config["Distance"] = Value
+            getgenv().Config["Radius Attack"] = Value
             getgenv()['Update_Setting'](getgenv()['MyName'])
         end
     })
-Tabs.General:AddSection("Dash")
-Tabs.General:AddToggle("Auto Dash", {
+local PlayerList = {}
+for i,v in pairs(game.Players:GetPlayers()) do
+    if v.Name ~= Players.LocalPlayer.Name then
+        table.insert(PlayerList,v.Name)
+    end
+end
+local ModeList = {
+    "Radius",
+    "Nearest",
+    "Aimbot"
+}
+Tabs.Legit:AddSection("Dash")
+PlayerDrop = Tabs.Legit:AddDropdown("Select Players", {
+    Title = "Select Players",
+    Description = "",
+    Values = PlayerList,
+    Multi = false,
+    Default = getgenv().Config["Select Players"] or nil,
+})
+PlayerDrop:OnChanged(function(Value)
+    getgenv().Config["Select Players"] = Value
+    getgenv()['Update_Setting'](getgenv()['MyName'])
+end)
+Tabs.Legit:AddButton({
+    Title = "Refresh Players",
+    Description = "",
+    Callback = function()
+        for i,v in pairs(game.Players:GetPlayers()) do
+            if v.Name ~= Players.LocalPlayer.Name then
+                table.insert(PlayerList,v.Name)
+            end
+        end
+    end
+})
+ModeDrop = Tabs.Legit:AddDropdown("Select Mode", {
+    Title = "Select Mode",
+    Description = "",
+    Values = ModeList,
+    Multi = false,
+    Default = getgenv().Config["Select Mode"] or nil,
+})
+ModeDrop:OnChanged(function(Value)
+    getgenv().Config["Select Mode"] = Value
+    getgenv()['Update_Setting'](getgenv()['MyName'])
+end)
+Tabs.Legit:AddToggle("Auto Dash", {
     Title = "Auto Dash", 
     Description = "",
     Default = getgenv().Config["Auto Dash"] or false,
@@ -256,7 +256,7 @@ Tabs.General:AddToggle("Auto Dash", {
 })
 spawn(function()
     while task.wait() do
-        if getgenv().Config["Auto Dash"] then
+        if getgenv().Config["Auto Dash"] and getgenv().Config["Select Mode"] == "Radius" then
             pcall(function()
                 for i,v in pairs(workspace.Live:GetChildren()) do
                     local checkh = v:FindFirstChild "HumanoidRootPart"
@@ -292,7 +292,110 @@ spawn(function()
         end
     end
 end)
-Tabs.General:AddToggle("Enabled Lock", {
+spawn(function()
+    while task.wait() do
+        if getgenv().Config["Auto Dash"] and getgenv().Config["Select Mode"] == "Nearest" then
+            pcall(function()
+                for i,v in pairs(workspace.Live:GetChildren()) do
+                    local checkh = v:FindFirstChild "HumanoidRootPart"
+                    if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" then
+                        if checkh and (checkh.Position - hrp.Position).Magnitude <= 999999999 then
+                            local args = {
+                                {
+                                    Dash = Enum.KeyCode.W,
+                                    Key = Enum.KeyCode.Q,
+                                    Goal = "KeyPress"
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            local args = {
+                                {
+                                    Goal = "KeyRelease",
+                                    Key = Enum.KeyCode.Q
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        else
+                            local args = {
+                                {
+                                    Goal = "KeyRelease",
+                                    Key = Enum.KeyCode.Q
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+spawn(function()
+    while task.wait() do
+        if getgenv().Config["Auto Dash"] and getgenv().Config["Select Mode"] == "Aimbot" then
+            pcall(function()
+                for i,v in pairs(workspace.Live:GetChildren()) do
+                    local checkh = v:FindFirstChild "HumanoidRootPart"
+                    if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" and v.Name == getgenv().Config["Select Players"] then
+                        if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Radius"] then
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, checkh.Position)
+                            local args = {
+                                {
+                                    Dash = Enum.KeyCode.W,
+                                    Key = Enum.KeyCode.Q,
+                                    Goal = "KeyPress"
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            local args = {
+                                {
+                                    Goal = "KeyRelease",
+                                    Key = Enum.KeyCode.Q
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        else
+                            local args = {
+                                {
+                                    Goal = "KeyRelease",
+                                    Key = Enum.KeyCode.Q
+                                }
+                            }
+                            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if getgenv().Config["Select Mode"] == "Aimbot" and input.KeyCode == Enum.KeyCode.Q then
+        pcall(function()
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local hrp = character:WaitForChild("HumanoidRootPart")
+            
+            for _, v in pairs(workspace.Live:GetChildren()) do
+                local checkh = v:FindFirstChild("HumanoidRootPart")
+                if v.Name ~= LocalPlayer.Name and v.Name ~= "Weakest Dummy" and v.Name == getgenv().Config["Select Players"] then
+                    if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Radius"] then
+                        repeat
+                            task.wait()
+                            local currentCheckm = character:FindFirstChild("Freeze")
+                            hrp.CFrame = CFrame.lookAt(hrp.Position, checkh.Position)
+                        until getgenv().Config["Select Mode"] ~= "Aimbot" or not character:FindFirstChild("Freeze")
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+Tabs.Legit:AddToggle("Enabled Lock", {
     Title = "Enabled Lock", 
     Description = "",
     Default = getgenv().Config["Enabled Lock"] or false,
@@ -303,7 +406,7 @@ Tabs.General:AddToggle("Enabled Lock", {
 })
 spawn(function()
     while task.wait() do
-        if getgenv().Config["Auto Dash"] and getgenv().Config["Enabled Lock"] then
+        if getgenv().Config["Auto Dash"] and getgenv().Config["Enabled Lock"] and getgenv().Config["Select Mode"] == "Radius" then
             pcall(function()
                 for i,v in pairs(workspace.Live:GetChildren()) do
                     local checkh = v:FindFirstChild "HumanoidRootPart"
@@ -318,7 +421,24 @@ spawn(function()
         end
     end
 end)
-Tabs.General:AddSlider("Radius",
+spawn(function()
+    while task.wait() do
+        if getgenv().Config["Auto Dash"] and getgenv().Config["Enabled Lock"] and getgenv().Config["Select Mode"] == "Nearest" then
+            pcall(function()
+                for i,v in pairs(workspace.Live:GetChildren()) do
+                    local checkh = v:FindFirstChild "HumanoidRootPart"
+                    if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" then
+                        if checkh and (checkh.Position - hrp.Position).Magnitude <= 999999999 then
+                        hrp.CFrame = CFrame.lookAt(hrp.Position, checkh.Position)
+                        else
+                        end
+                    end
+                end
+            end)
+        end
+    end
+end)
+Tabs.Legit:AddSlider("Radius",
     {
         Title = "Radius",
         Description = "",
@@ -331,6 +451,7 @@ Tabs.General:AddSlider("Radius",
             getgenv()['Update_Setting'](getgenv()['MyName'])
         end
     })
+Tabs.Legit:AddSection("Dash Aimbot")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -340,7 +461,7 @@ local Camera = workspace.CurrentCamera
 local hrp = LocalPlayer.Character:WaitForChild("HumanoidRootPart")
 local aimbotCircle
 local dashCircle
-Tabs.General:AddToggle("Enabled Aimbot", {
+Tabs.Legit:AddToggle("Enabled Aimbot", {
     Title = "Enabled Aimbot", 
     Description = "",
     Default = getgenv().Config["Enabled Aimbot"] or false,
@@ -374,7 +495,7 @@ Tabs.General:AddToggle("Enabled Aimbot", {
         end
     end
 })
-Tabs.General:AddSlider("Fov", {
+Tabs.Legit:AddSlider("Fov", {
     Title = "Fov",
     Description = "",
     Default = getgenv().Config["Fov"] or 100,
@@ -417,19 +538,42 @@ end)
 local lastDash = 0
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
-    if input.KeyCode == Enum.KeyCode.Q or getgenv().Config["Auto Dash"] and getgenv().Config["Enabled Aimbot"] then
+    if input.KeyCode == Enum.KeyCode.Q and getgenv().Config["Enabled Aimbot"] then
         if tick() - lastDash >= 2.5 then
             lastDash = tick()
             local target = getTargetNearMouse(getgenv().Config["Fov"])
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
             if target and hrp then
                 local direction = (target.Position - hrp.Position).Unit
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + direction)
+                repeat
+                    task.wait()
+                    local currentCheckm = character:FindFirstChild("Freeze")
+                    hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + direction)
+                until not getgenv().Config["Enabled Aimbot"] or not character:FindFirstChild("Freeze")
             end
         end
     end
 end)
-Tabs.Parry:AddSection("Parry")
-Tabs.Parry:AddToggle("Enabled Parry", {
+UserInputService.InputBegan:Connect(function(gameProcessed)
+    if gameProcessed then return end
+    if getgenv().Config["Auto Dash"] and getgenv().Config["Enabled Aimbot"] then
+        if tick() - lastDash >= 2.5 then
+            lastDash = tick()
+            local target = getTargetNearMouse(getgenv().Config["Fov"])
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            if target and hrp then
+                local direction = (target.Position - hrp.Position).Unit
+                repeat
+                    task.wait()
+                    local currentCheckm = character:FindFirstChild("Freeze")
+                    hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + direction)
+                until not getgenv().Config["Enabled Aimbot"] or not character:FindFirstChild("Freeze")
+            end
+        end
+    end
+end)
+Tabs.Legit:AddSection("Parry")
+Tabs.Legit:AddToggle("Enabled Parry", {
     Title = "Enabled Parry", 
     Description = "",
     Default = getgenv().Config["Enabled Parry"] or false,
@@ -445,9 +589,10 @@ spawn(function()
             for i,v in pairs(workspace.Live:GetChildren()) do
                 local checkh = v:FindFirstChild "HumanoidRootPart"
                 local checkm = v:FindFirstChild "Freeze" or v:FindFirstChild "M1ing" or v:FindFirstChild "NoBlock"
-                if v.Name ~= game.Players.LocalPlayer.Name then
-                    if checkh and checkm and (checkh.Position - hrp.Position).Magnitude <= 30 then
+                if v.Name ~= Players.LocalPlayer.Name then
+                    if checkh and checkm and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Radius Parry"] then
                         repeat
+                            local checkm2 = v:FindFirstChild("Freeze") or v:FindFirstChild("M1ing") or v:FindFirstChild("NoBlock")
                             local args = {
                                 {
                                     Goal = "KeyPress",
@@ -456,15 +601,15 @@ spawn(function()
                             }
                             game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                             wait()
-                        until not getgenv().Config["Enabled Parry"] or (checkh.Position - hrp.Position).Magnitude > 30 or not checkm
+                        until not getgenv().Config["Enabled Parry"] or (checkh.Position - hrp.Position).Magnitude > 30 or not checkm2
                     else
                         local args = {
-                        {
-                            Goal = "KeyRelease",
-                            Key = Enum.KeyCode.F
+                            {
+                                Goal = "KeyRelease",
+                                Key = Enum.KeyCode.F
+                            }
                         }
-                    }
-                    game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
                         end
                     end
                 end
@@ -472,7 +617,20 @@ spawn(function()
         end
     end
 end)
-Tabs.Parry:AddToggle("Enabled Lock", {
+Tabs.Legit:AddSlider("Radius",
+    {
+        Title = "Radius",
+        Description = "",
+        Default = getgenv().Config["Radius"] or 15,
+        Min = 5,
+        Max = 30,
+        Rounding = 0,
+        Callback = function(Value)
+            getgenv().Config["Radius Parry"] = Value
+            getgenv()['Update_Setting'](getgenv()['MyName'])
+        end
+    })
+Tabs.Legit:AddToggle("Enabled Lock", {
     Title = "Enabled Lock", 
     Description = "",
     Default = getgenv().Config["Enabled Lock"] or false,
@@ -499,6 +657,68 @@ spawn(function()
         end
     end
 end)
+Tabs.Rage:AddSection("Kill Players")
+Tabs.Rage:AddToggle("Auto Kill Players", {
+    Title = "Auto Kill Players", 
+    Description = "",
+    Default = getgenv().Config["Auto Kill Players"] or false,
+    Callback = function(Value)
+        getgenv().Config["Auto Kill Players"] = Value
+        getgenv()['Update_Setting'](getgenv()['MyName'])
+    end
+})
+spawn(function()
+    while task.wait() do
+        if getgenv().Config["Auto Kill Players"] then
+            pcall(function()
+                for i,v in pairs(workspace.Live:GetChildren()) do
+                    local checkh = v:FindFirstChild "HumanoidRootPart"
+                    if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" then
+                        if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Distance"] then
+                            repeat
+                                task.wait()
+                                TP(checkh.CFrame * CFrame.new(0,0,4))
+                                local args = {
+                                    {
+                                        Goal = "LeftClick"
+                                    }
+                                }
+                                game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0
+                        else
+                        local args = {
+                            {
+                                Goal = "LeftClickRelease"
+                            }
+                        }
+                        game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                        end
+                    end
+                end
+            end)
+        else
+            local args = {
+                {
+                    Goal = "LeftClickRelease"
+                }
+            }
+            game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+        end
+    end
+end)
+Tabs.Rage:AddSlider("Distance",
+    {
+        Title = "Distance",
+        Description = "",
+        Default = getgenv().Config["Distance"] or 150,
+        Min = 50,
+        Max = 300,
+        Rounding = 0,
+        Callback = function(Value)
+            getgenv().Config["Distance"] = Value
+            getgenv()['Update_Setting'](getgenv()['MyName'])
+        end
+    })
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
