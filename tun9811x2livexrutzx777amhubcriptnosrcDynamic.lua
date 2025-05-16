@@ -68,6 +68,24 @@ end)
 function TP(Pos)
     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = Pos
 end
+spawn(function()
+    pcall(function()
+        while wait() do
+            if getgenv().Config["Auto Kill Players"] then
+                if not game:GetService("Players").LocalPlayer.Character.HumanoidRootPart:FindFirstChild("BodyClip") then
+                    local Noclip = Instance.new("BodyVelocity")
+                    Noclip.Name = "BodyClip"
+                    Noclip.Parent = game:GetService("Players").LocalPlayer.Character.HumanoidRootPart
+                    Noclip.MaxForce = Vector3.new(
+                    100000000000000000000000000000000000000000000000000000000000000000000000000000000000,
+                        100000000000000000000000000000000000000000000000000000000000000000000000000000000000,
+                        100000000000000000000000000000000000000000000000000000000000000000000000000000000000)
+                    Noclip.Velocity = Vector3.new(0, 0, 0)
+                end
+            end
+        end
+    end)
+end)
 local TweenService = game:GetService("TweenService")
 _G.Logo = 83452741766028 --- เลข logo
 if game.CoreGui:FindFirstChild("ImageButton") then
