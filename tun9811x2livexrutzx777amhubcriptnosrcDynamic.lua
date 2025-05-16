@@ -675,8 +675,18 @@ spawn(function()
                     local checkh = v:FindFirstChild "HumanoidRootPart"
                     if v.Name ~= game.Players.LocalPlayer.Name and v.Name ~= "Weakest Dummy" then
                         if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Distance"] then
+                            HealthMs = game.Players.LocalPlayer.Character.Humanoid.MaxHealth * 20 / 100
                             repeat
                                 task.wait()
+                                if getgenv().Config["Enabled Safe Mode"] and game.Players.LocalPlayer.Character.Humanoid.Health <= HealthMs then
+                                TP(checkh.CFrame * CFrame.new(0,50,4))
+                                local args = {
+                                    {
+                                        Goal = "LeftClick"
+                                    }
+                                }
+                                game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            else
                                 TP(checkh.CFrame * CFrame.new(0,0,4))
                                 local args = {
                                     {
@@ -684,6 +694,7 @@ spawn(function()
                                     }
                                 }
                                 game:GetService("Players").LocalPlayer.Character:WaitForChild("Communicate"):FireServer(unpack(args))
+                            end
                             until not getgenv().Config["Auto Kill Players"] or v.Humanoid.Health <= 0
                         else
                         local args = {
@@ -719,6 +730,15 @@ Tabs.Rage:AddSlider("Distance",
             getgenv()['Update_Setting'](getgenv()['MyName'])
         end
     })
+Tabs.Rage:AddToggle("Enabled Safe Mode", {
+    Title = "Enabled Safe Mode",
+    Description = "",
+    Default = getgenv().Config["Enabled Safe Mode"] or false,
+    Callback = function(Value)
+        getgenv().Config["Enabled Safe Mode"] = Value
+        getgenv()['Update_Setting'](getgenv()['MyName'])
+    end
+})
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
