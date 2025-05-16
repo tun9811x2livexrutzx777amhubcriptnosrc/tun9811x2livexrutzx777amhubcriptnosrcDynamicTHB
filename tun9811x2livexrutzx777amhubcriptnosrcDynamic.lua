@@ -668,7 +668,7 @@ Tabs.Rage:AddToggle("Auto Kill Players", {
     end
 })
 spawn(function()
-    while task.wait() do
+    while wait() do
         if getgenv().Config["Auto Kill Players"] then
             pcall(function()
                 for i,v in pairs(workspace.Live:GetChildren()) do
@@ -677,7 +677,7 @@ spawn(function()
                         if checkh and (checkh.Position - hrp.Position).Magnitude <= getgenv().Config["Distance"] then
                             HealthMs = game.Players.LocalPlayer.Character.Humanoid.MaxHealth * 20 / 100
                             repeat
-                                task.wait()
+                                wait()
                                 if getgenv().Config["Enabled Safe Mode"] and game.Players.LocalPlayer.Character.Humanoid.Health <= HealthMs then
                                 TP(checkh.CFrame * CFrame.new(0,50,4))
                                 local args = {
